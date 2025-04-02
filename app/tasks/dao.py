@@ -6,8 +6,8 @@ from app.tasks.models import Task
 class TaskDAO:
 
     @staticmethod
-    async def get_all(db: AsyncSession) -> list[Task]:
-        result = await db.execute(select(Task))
+    async def get_all_by_owner(owner_id: int, db: AsyncSession) -> list[Task]:
+        result = await db.execute(select(Task).where(Task.owner_id == owner_id))
         return result.scalars().all()
 
     @staticmethod
@@ -24,9 +24,16 @@ class TaskDAO:
         return task
 
     @staticmethod
-    async def delete(task: Task, db: AsyncSession):
+    async def delete(task_id: int, db: AsyncSession) -> bool:
+        result = await db.execute(select(Task).where(Task.id == task_id))
+        task = result.scalar_one_or_none()
+
+        if not task: 
+            return False
+        
         await db.delete(task)
         await db.commit()
+        return True
 
     @staticmethod
     async def update(task_id: int, data: dict, db: AsyncSession) -> Optional[Task]:
@@ -42,3 +49,4 @@ class TaskDAO:
         await db.commit()
         await db.refresh(task)
         return task
+    
