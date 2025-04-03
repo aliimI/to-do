@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +11,7 @@ from app.tasks.models import Task
 from app.tasks.schemas import TaskCreate, TaskRead, TaskUpdate
 from app.auth.deps import get_current_user
 from app.users.models import User
+from app.tasks.schemas import Status, Priority
 
 router = APIRouter(
     prefix="/tasks",
@@ -31,9 +34,25 @@ async def create_task(
 
 
 @router.get("/", response_model=list[TaskRead])
-async def get_tasks(db: AsyncSession = Depends(get_async_session), 
-                    current_user: User = Depends(get_current_user)):
-    return await TaskDAO.get_all_by_owner(current_user.id, db)
+async def get_tasks(
+    status: Optional[Status] = None, 
+    priority: Optional[Priority] = None,
+    due_before: Optional[datetime] = None,
+    due_after: Optional[datetime] = None,
+    search: Optional[str] = None,
+    db: AsyncSession = Depends(get_async_session), 
+    current_user: User = Depends(get_current_user)
+    ):
+
+    return await TaskDAO.get_all_by_owner(
+        owner_id=current_user.id,
+        db=db,
+        status=status,
+        priority=priority,
+        due_before=due_before,
+        due_after=due_after,
+        search=search
+    )
 
 
 @router.get("/{task_id}", response_model=TaskRead)
