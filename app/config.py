@@ -7,7 +7,16 @@ class Settings(BaseSettings):
     DB_PASS: str
     DB_NAME: str
 
-    secret_key: str
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASS: str
+
+    REDIS_HOST: str      
+    REDIS_PORT: int
+
+
+    SECRET_KEY: str
 
     @property
     def DATABASE_URL(self):

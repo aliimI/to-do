@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -12,13 +12,34 @@ from app.tasks.schemas import TaskCreate, TaskRead, TaskUpdate
 from app.auth.deps import get_current_user
 from app.users.models import User
 from app.tasks.schemas import Status, Priority
+from app.background.email_jobs import send_due_reminder
+
 
 router = APIRouter(
     prefix="/tasks",
     tags=["Tasks"]
 )
 
-
+def get_reminder_offset(priority: str) -> timedelta:
+    #for python > 3.10
+    # match priority:
+    #     case "High":
+    #         return timedelta(days=1)
+    #     case "Medium":
+    #         return timedelta(hours=6)
+    #     case "Low":
+    #         return timedelta(hours=1)
+    #     case _:
+    #         return timedelta(hours=1)
+    if priority == "High":
+        return timedelta(days=1)
+    elif priority == "Medium":
+        return timedelta(hours=6)
+    elif priority == "Low":
+        return timedelta(hours=1)
+    else:
+        return timedelta(hours=1)
+    
 
 @router.post("/", response_model=TaskRead)
 async def create_task(
@@ -30,6 +51,22 @@ async def create_task(
     db.add(new_task)
     await db.commit()
     await db.refresh(new_task)
+
+
+    #reminder functionality 
+    if new_task.due_date:
+        reminder_eta = new_task.due_date - get_reminder_offset(new_task.priority)
+        # #testing 
+        # reminder_eta = datetime.now(timezone.utc) + timedelta(seconds=30)
+
+        if reminder_eta > datetime.now(timezone.utc):
+            send_due_reminder.apply_async(
+                args=[new_task.title, current_user.email, new_task.due_date.isoformat()],
+                eta=reminder_eta
+            )
+        else:
+            print("Reminder time is in the past")
+
     return new_task
 
 
