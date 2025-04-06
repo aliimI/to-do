@@ -13,3 +13,6 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     
     tasks: Mapped[list["Task"]] = relationship(back_populates="owner", lazy="selectin")
+
+    def __str__(self):
+        return f"{self.email}"
