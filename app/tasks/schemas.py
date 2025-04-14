@@ -4,8 +4,6 @@ from datetime import datetime
 from typing import Optional
 from enum import Enum
 
-
-
 class Status(str, Enum):
     todo = "To-Do"
     in_progress = "In Progress"
@@ -16,12 +14,20 @@ class Priority(str, Enum):
     medium = "Medium"
     high = "High"
 
+class Repeat(str, Enum):
+    none = "None"
+    daily = "Daily"
+    weekly = "Weekly"
+    monthly = "Monthly"
+
 class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
     status: Status
     priority: Priority
     due_date: Optional[datetime] = None
+    repeat: Repeat = Repeat.none
+    
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None

@@ -1,4 +1,5 @@
 from sqladmin import Admin, ModelView
+
 from app.tasks.models import Task
 from app.users.models import User
 
@@ -11,10 +12,17 @@ class UsersAdmin(ModelView, model=User):
     icon = "fa-solid fa-user"
 
 class TasksAdmin(ModelView, model=Task):
-    column_list = [Task.id, Task.title, Task.description, Task.owner] 
+    column_list = [Task.id, Task.title, Task.status,  Task.priority, Task.description, Task.repeat, Task.owner] 
     column_details_exclude_list = [Task.created_at, Task.updated_at]
+    column_sortable_list = [
+        "status",
+        "priority",
+        "repeat"
+    ]
     
     name = "Task"
     name_plural = "Tasks"
     icon = "fa-solid fa-list"
+
+    
 
