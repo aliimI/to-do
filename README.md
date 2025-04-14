@@ -10,5 +10,11 @@ Full-featured backend part for To-Do list app built with **FastAPI**, **SQLAlche
 - Background task system with support for repeating tasks
 
 ## Features
-
+- User Registration / Login
+- JWT Tokens 
+- CRUD
+- Task repeat logic (`None`, `Daily`, `Weekly`, `Monthly`)
+- Celery job to auto-repeat tasks based on schedule
+- Email reminders via Gmail SMTP
+- Admin panel for managing Users & Tasks
 
