@@ -12,6 +12,7 @@ const routes = [
         path: '/tasks',
         name: 'Tasks',
         component: Tasks,
+        meta: {requiresAuth: true},
     },
     {
         path: '/:pathMatch(.*)*',
@@ -22,6 +23,15 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+});
+
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!localStorage.getItem('token');
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next('login');
+    } else {
+        next();
+    }
 });
 
 export default router;
